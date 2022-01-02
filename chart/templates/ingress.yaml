@@ -3,7 +3,7 @@
 {{- $webPort := .Values.mastodon.web.port -}}
 {{- $streamingPort := .Values.mastodon.streaming.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
@@ -34,13 +34,19 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-web
-              servicePort: {{ $webPort }}
+              service:
+                name: {{ $fullName }}-web
+                port:
+                  number: {{ $webPort }}
           - path: {{ .path }}api/v1/streaming
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-streaming
-              servicePort: {{ $streamingPort }}
+              service:
+                name: {{ $fullName }}-streaming
+                port:
+                  number: {{ $streamingPort }}
           {{- end }}
     {{- end }}
 {{- end }}
